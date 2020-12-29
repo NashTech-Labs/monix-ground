@@ -1,61 +1,98 @@
 package com.knoldus.config.app
 
 // On evaluation a Scheduler is needed
-import monix.execution.CancelableFuture
+
 import monix.execution.Scheduler.Implicits.global
 
-import scala.collection.immutable
+import scala.concurrent.Future
 import scala.util.Random
 // For Task
-import monix.eval._
 // For Observable
-import monix.reactive._
-
-case class Student(rollNo: Int, marks: Int)
 
 
-object SampleApplication extends App {
+object SampleApplicationWithTaskNow /*extends App*/ {
 
-  def average(students: List[Student]): Int = {
-    students.map(_.marks).sum / students.size
+  def average(students: List[Student], i: Int): Int = {
+    Thread.sleep(2000) // Wait time 2 seconds
+    val average = students.map(_.marks).sum / students.size
+    println(s"===> Calculated average = $average with id : $i")
+    average
   }
 
-  val students: List[Student] = (0 until 100).map{ rollNo =>
+  def averageFuture(students: List[Student], i: Int): Future[Int] = Future {
+    Thread.sleep(2000) // Wait time 2 seconds
+    val average = students.map(_.marks).sum / students.size
+    println(s"===> Calculated average = $average with id : $i")
+    average
+  }
+
+  def students: List[Student] = (0 until 100).map { rollNo =>
     Student(rollNo, Random.nextInt(100))
   }.toList
 
-  val averageMarksTask: Task[Int] = Task(average(students))
+  /*println("\nTask.now...")
+  val averageMarksTaskNow: Task[Int] = Task.now(average(students, 1))
 
-  val result = averageMarksTask.runAsync{
-    case Right(value) => println("Value.... " + value)
-    case Left(ex) => println("Error....." + ex)
+
+  println("\nTask...")
+  val averageMarksTask: Task[Int] = Task(average(students, 2))
+
+
+  println("\nTask.eval...")
+  val averageMarksTaskEval: Task[Int] = Task.eval(average(students, 3))
+
+  averageMarksTaskEval.runToFuture.foreach(println)
+  averageMarksTaskEval.runToFuture.foreach(println)*/
+
+
+  /*  println("\nTask.evalOnce...")
+    val averageMarksTaskEvalOnce: Task[Int] = Task.evalOnce(average(students, 4))
+
+    averageMarksTaskEvalOnce.runToFuture.foreach(println)
+    averageMarksTaskEvalOnce.runToFuture.foreach(println)*/
+
+  /* println("\nTask.defer...")
+
+   val task = Task.defer{
+     Task.now(average(students, 5))
+   }
+
+   task.runToFuture.foreach(println)
+   task.runToFuture.foreach(println)*/
+
+  /*println("Task.fromFuture...")
+  private val futureAverage: Future[Int] = Future(average(students, 6))
+
+  val futureToTask: Task[Int] = Task.fromFuture(futureAverage)
+
+  futureToTask.foreach(println)*/
+
+
+  /*
+  println("Task.defer(future)")
+  val taskfromFuture = Task.defer{
+    val futureRes = Future(average(students, 7))
+    Task.fromFuture(futureRes)
   }
 
-  val fut: CancelableFuture[Int] = averageMarksTask.runToFuture
+  taskfromFuture.foreach(println)*/
 
-  println("Fut....." + fut)
+  /*println("Task.deferFuture")
 
-//  println("Average marks... " + averageMarks)
+  val taskDeferFuture = Task.deferFuture{
+    Future(average(students, 8))
+  }
 
-  // The list of all tasks needed for execution
-//  val tasks: immutable.Seq[Task[Int]] = items.map(i => Task(i * 2 / 2))
-  // Processing in parallel
-//  val aggregate: Task[immutable.Seq[Int]] = Task.parSequence(tasks)
-
-
-  // Evaluation:
-  /*val resp: Task[immutable.Seq[Int]] = aggregate.map{ x =>
-    println("=====+++>>>>>>>" + x)
-    x.map(_ + 1)
-  }*/
-
-//  resp.foreach(x => println("........... " + x))
+  taskDeferFuture.foreach(println)*/
 
 
-//  Task.future
+  /*println("Task.deferFutureAction")
 
+  def sumTask(list: List[Student])(implicit ec: ExecutionContext): Task[Int] ={
+    Task.deferFutureAction(averageFuture(list, 12))
+  }
 
+  val task = sumTask(students)
 
-
-
+  task.foreach(println)*/
 }
